@@ -71,25 +71,29 @@ namespace Notifications.Wpf.Controls
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
-            var closeButton = GetTemplateChild("PART_CloseButton") as Button;
-            if (closeButton != null)
+
+
+            if (GetTemplateChild("PART_CloseButton") is Button closeButton)
+            {
                 closeButton.Click += OnCloseButtonOnClick;
-
-            var loadingAnimation = Template.Resources["LoadingAnimation"] as Storyboard;
-
-            
-
-            if (loadingAnimation == null)
-            {
-                return;
             }
 
-            if (Equals(LayoutTransform, Transform.Identity))
+            if (Template.Resources["LoadingAnimation"] is Storyboard loadingAnimation)
             {
-                LayoutTransform = new ScaleTransform(1, 1);
-            }
+                if (Equals(LayoutTransform, Transform.Identity))
+                {
+                    LayoutTransform = new ScaleTransform(1, 1);
+                }
+                try
+                {
+                    loadingAnimation.Begin(this, Template);
 
-            loadingAnimation.Begin(this, Template);
+                }
+                catch (System.Exception)
+                {
+                    //throw;
+                }
+            }
         }
 
         private void OnCloseButtonOnClick(object sender, RoutedEventArgs args)
@@ -103,27 +107,39 @@ namespace Notifications.Wpf.Controls
 
         public void Close()
         {
-            if (IsClosing)
+            if (!IsClosing)
             {
-                return;
+                IsClosing = true;
+
+                var closingAnimation = (Template.Resources["ClosingAnimation"] as Storyboard)?.Clone();
+
+                if (closingAnimation == null)
+                {
+                    RaiseEvent(new RoutedEventArgs(NotificationClosedEvent));
+
+                }
+                else
+                {
+
+
+                    try
+                    {
+                        closingAnimation.Completed += (sender, args) =>
+                        {
+                            RaiseEvent(new RoutedEventArgs(NotificationClosedEvent));
+                        };
+
+                        closingAnimation.Begin(this, Template, true);
+
+                    }
+                    catch (System.Exception)
+                    {
+
+                        RaiseEvent(new RoutedEventArgs(NotificationClosedEvent));
+
+                    }
+                }
             }
-
-            IsClosing = true;
-
-            var closingAnimation = (Template.Resources["ClosingAnimation"] as Storyboard)?.Clone();
-
-            if (closingAnimation == null)
-            {
-                RaiseEvent(new RoutedEventArgs(NotificationClosedEvent));
-                return;
-            }
-
-            closingAnimation.Completed += (sender, args) =>
-            {
-                RaiseEvent(new RoutedEventArgs(NotificationClosedEvent));
-            };
-
-            closingAnimation.Begin(this, Template, true);
         }
     }
         
