@@ -23,13 +23,13 @@ namespace Notifications.Wpf
             _dispatcher = dispatcher;
         }
 
-        public void Show(object content, string areaName = "", TimeSpan? expirationTime = null, Action onClick = null,
+        public void Show(object content, string areaName = "", int uniqueId = 0, TimeSpan? expirationTime = null, Action onClick = null,
             Action onClose = null)
         {
             if (!_dispatcher.CheckAccess())
             {
                 _dispatcher.BeginInvoke(
-                    new Action(() => Show(content, areaName, expirationTime, onClick, onClose)));
+                    new Action(() => Show(content, areaName, uniqueId, expirationTime, onClick, onClose)));
                 return;
             }
 
@@ -50,9 +50,26 @@ namespace Notifications.Wpf
                 _window.Show();
             }
 
-            foreach (var area in Areas.Where(a => a.Name == areaName))
+            if (uniqueId > 0)
             {
-                area.Show(content, (TimeSpan) expirationTime, onClick, onClose);
+
+
+                foreach (var area in Areas.Where(a => a.Name == areaName && a.UniqueId == uniqueId ))
+                {
+
+                    area.Show(content, (TimeSpan)expirationTime, onClick, onClose);
+
+                }
+            }
+            else
+            {
+                foreach (var area in Areas.Where(a => a.Name == areaName))
+                {
+
+                    area.Show(content, (TimeSpan)expirationTime, onClick, onClose);
+
+                }
+
             }
         }
 

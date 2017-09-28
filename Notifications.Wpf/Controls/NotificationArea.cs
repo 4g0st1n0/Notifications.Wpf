@@ -34,6 +34,22 @@ namespace Notifications.Wpf.Controls
         public static readonly DependencyProperty MaxItemsProperty =
             DependencyProperty.Register("MaxItems", typeof(int), typeof(NotificationArea), new PropertyMetadata(int.MaxValue));
 
+
+
+
+        public int UniqueId
+        {
+            get { return (int)GetValue(UniqueIdProperty); }
+            set { SetValue(UniqueIdProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for UniqueId.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty UniqueIdProperty =
+            DependencyProperty.Register("UniqueId", typeof(int), typeof(NotificationArea), new PropertyMetadata(0));
+
+
+
+
         private IList _items;
 
         public NotificationArea()
